@@ -1,8 +1,6 @@
 name: Bitcoin
 
-on: 
-  schedule:
-    - cron: "*/5 * * * *" 
+
 
 jobs:
   write-prices:
