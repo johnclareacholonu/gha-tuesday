@@ -6,7 +6,6 @@ from datetime import datetime
 # Define the URL for the API endpoint
 url = 'https://api.coindesk.com/v1/bpi/currentprice/BTC.json'
 
-
 # Function to get Bitcoin price
 def get_bitcoin_price():
     try:
@@ -38,3 +37,4 @@ def main():
 
 
 if __name__ == "__main__":
+    main()
