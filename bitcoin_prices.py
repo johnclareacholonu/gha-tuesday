@@ -1,39 +1,40 @@
-name: Bitcoin
+import requests
+import csv
+import time
+from datetime import datetime
 
-on: 
-  schedule:
-    - cron: "*/5 * * * *" 
+# Define the URL for the API endpoint
+url = 'https://api.coindesk.com/v1/bpi/currentprice/BTC.json'
 
-jobs:
-  write-prices:
-    runs-on: ubuntu-latest
 
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }} 
-        
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.x'
+# Function to get Bitcoin price
+def get_bitcoin_price():
+    try:
+        response = requests.get(url)
+        data = response.json()
+        price = data['bpi']['USD']['rate_float']
+        return price
+    except Exception as e:
+        print(f"Error fetching data: {e}")
+        return None
 
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install requests
 
-    - name: Run Python script
-      run: |
-        python bitcoin_prices.py
+# Function to write data to CSV
+def write_to_csv(timestamp, price):
+    with open('bitcoin_prices.csv', mode='a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow([timestamp, price])
 
-    - name: Commit changes
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Ensure the token is available
-      run: |
-        git config --global user.name 'johnclareacholonu'
-        git config --global user.email 'johnclareacholonu@users.noreply.github.com'
-        git add bitcoin_prices.csv
-        git commit -m 'Update rbitcoin_prices.csv with new prices'
-        git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:${{ github.ref }}
+
+# Main function to fetch price
+def main():
+    timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    price = get_bitcoin_price()
+    if price:
+        write_to_csv(timestamp, price)
+        print(f"Recorded at {timestamp}: ${price}")
+    else:
+        print(f"Failed to record at {timestamp}")
+
+
+if __name__ == "__main__":
